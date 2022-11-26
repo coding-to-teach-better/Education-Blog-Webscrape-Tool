@@ -1,0 +1,113 @@
+
+def web_word_counter(search_word, webpage): 
+    from collections import defaultdict
+    from bs4 import BeautifulSoup
+    import requests
+    import urllib.request
+    from urllib.request import urlopen
+    import pandas as pd
+    import numpy as np
+    from collections import OrderedDict 
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+
+    text = []
+    counts = []
+    times3 = [] 
+    text2 = []
+    times2 = []
+    times4 = []
+    list1 = []
+    list2 = []
+    
+    def scrape():
+        # problem with double figures
+        pages = 200
+        for page_number in range(pages):
+            while page_number<10:
+                position = -3
+                new_character = str(page_number)
+                webpage3 = webpage[:position] + new_character + webpage[position+1:]
+            else:
+                position = -3
+                new_character = ""
+                webpage1 = webpage[:position] + new_character + webpage[position+1:]
+                position = -2
+                new_character = ""
+                webpage2 = webpage1[:position] + new_character + webpage1[position+1:]
+                position = -2
+                new_character = "/"+str(page_number)
+                webpage3 = webpage2[:position] + new_character + webpage2[position+1:]
+            page = requests.get(webpage1)
+            soup = BeautifulSoup(page.content, "html.parser")
+            list(soup.children)
+            for p in soup.find_all("p"):
+                text2.append(p.get_text())
+            for t in soup.find_all("time"):
+                times2.append(t.get_text())
+    
+    def shorten_times(times2):  
+        for time in times2:
+            new_time = time.split(" ", 1)[1:2]
+            times3.append(new_time)
+        
+        
+    def nesting_to_flat(l):
+        for i in l:
+            if type(i) == list:
+                nesting_to_flat(i)
+            else:
+                times4.append(i)
+            
+    def creating_ordered_dict(text2, times4):
+        pnt1 = dict(zip(text2, times4))
+        res = defaultdict(list)
+        for key, val in sorted(pnt1.items()):
+            res[val].append(key)
+        final_dict = dict(res)
+        months = list(dict.fromkeys(times4))
+        final_dict1 = OrderedDict(reversed(sorted(final_dict.items(),key =lambda x:months.index(x[0]))))
+        return final_dict1
+
+    
+#something going wrong here
+    
+    def word_count_data_store(search_word):
+        final_dict1 = creating_ordered_dict(text2, times4)
+        list1.clear()
+        list2.clear()
+        counter = 0
+        total_word_count = 0
+        search_word_upper = search_word[0] + search_word[1::]
+        for key, value in final_dict1.items():
+            list1.append(key)
+            str_value = str(value).split(" ")
+            for word in str_value:
+                total_word_count = total_word_count + 1
+                if word == search_word.lower() or word == search_word_upper:
+                    counter = counter + 1
+            percentage = (counter/total_word_count)*100
+            list2.append(percentage)
+            counter = 0
+            total_word_count = 0
+        
+
+        
+    def create_bar(list1, list2):
+        print("total number of months = ", len(list1))
+        start_month = int(input("enter start month number "))
+        end_month = int(input("enter end month number "))
+        plt.bar(list1[start_month:end_month], list2[start_month:end_month])
+        plt.title(search_word + " as a percentage of total words")
+        plt.ylabel("Percentage of total words")
+        plt.xlabel("Month")
+        plt.xticks(rotation = 60)
+        plt.show()
+
+    scrape()
+    shorten_times(times2)
+    nesting_to_flat(times3)
+    word_count_data_store(search_word)
+    create_bar(list1, list2)
+
+web_word_counter("to", "https://teaching.blog.gov.uk/page/2/")
