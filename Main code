@@ -1,4 +1,6 @@
 
+
+
 def web_word_counter(search_word, webpage): 
     from collections import defaultdict
     from bs4 import BeautifulSoup
@@ -20,6 +22,9 @@ def web_word_counter(search_word, webpage):
     list1 = []
     list2 = []
     
+ 
+# function to scrape data from government blog 
+
     def scrape():
         # problem with double figures
         pages = 200
@@ -45,20 +50,26 @@ def web_word_counter(search_word, webpage):
                 text2.append(p.get_text())
             for t in soup.find_all("time"):
                 times2.append(t.get_text())
-    
+
+
+# reducing size of scrape
+
     def shorten_times(times2):  
         for time in times2:
             new_time = time.split(" ", 1)[1:2]
             times3.append(new_time)
         
-        
+ 
     def nesting_to_flat(l):
         for i in l:
             if type(i) == list:
                 nesting_to_flat(i)
             else:
                 times4.append(i)
-            
+                
+ 
+# function to create ordered dictionaries created from the lists holding the scrape results
+
     def creating_ordered_dict(text2, times4):
         pnt1 = dict(zip(text2, times4))
         res = defaultdict(list)
@@ -69,9 +80,9 @@ def web_word_counter(search_word, webpage):
         final_dict1 = OrderedDict(reversed(sorted(final_dict.items(),key =lambda x:months.index(x[0]))))
         return final_dict1
 
-    
-#something going wrong here
-    
+  
+# searching scrape results for search word
+
     def word_count_data_store(search_word):
         final_dict1 = creating_ordered_dict(text2, times4)
         list1.clear()
@@ -91,8 +102,8 @@ def web_word_counter(search_word, webpage):
             counter = 0
             total_word_count = 0
         
+# creating bar chart of results
 
-        
     def create_bar(list1, list2):
         print("total number of months = ", len(list1))
         start_month = int(input("enter start month number "))
